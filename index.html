@@ -63,7 +63,8 @@
 					height: 5%;
 					width: 100%;
 					padding: 10px 0 0 10px;
-					background-color: #E6E7E8;
+					background-color: #C2EDC3;
+					text-align: center;
 				}
 				
 				.asciieditable {					
@@ -90,8 +91,7 @@
 					height: 100%;
 					resize: none;
 					font-family: Courier;
-					font-size: 16;
-					
+					font-size: 16;					
 				}
 
 
@@ -129,6 +129,7 @@
 			var absoluteRep=new Array();
 			var absoluteRepSeparators=new Array();
 			var absoluteDirectionsArr=new Array();
+			var packetsTexts=new Array();
 			
 			var globalSeparator="\x00";
 			
@@ -137,7 +138,8 @@
 			var colorNOTOK = '#F5E4DF';
 			
 			function log(str) {
-				$("#log").append("\n" + str);
+				console.log(str);
+				//$("#log").append("\n" + str);
 			}
 			
 			function absToCRA() {
@@ -195,10 +197,13 @@
 				var retstr="";
 				for (var packetnum=0; packetnum<textsArr.length; packetnum++) {
 					log("<br>" + absoluteDirectionsArr[packetnum] + "<br>");
-					retstr += asciiRepDivTagOpen + (absoluteDirectionsArr[packetnum] ? "asciieditable blue" : "asciieditable red") + "'>";
+					retstr += asciiRepDivTagOpen + (absoluteDirectionsArr[packetnum] ? "asciieditable blue" : "asciieditable red") + "' id='packetText" + packetnum + "'>";
 					retstr += htmlForTextWithEmbeddedNewlines(textsArr[packetnum]);
 					retstr += "</div>";
+					$(document).on('input propertychange', "#packetText" + packetnum,function() {packetTextChange();						
+						log("changed pcacket" + packetnum) });
 				}
+				log(retstr);
 				return retstr;
 			}
 			
@@ -217,7 +222,7 @@
 				var retstr="";
 				var curchr;
 				var packetnum=1;
-				var packetsTexts=new Array();
+				packetsTexts=new Array();
 				var curtxt="";
 				
 				for (var i=0; i<absoluteRep.length; i++) {
@@ -243,8 +248,8 @@
 					if (i<absoluteRep.length-1) curtxt += "";
 				}
 				packetsTexts.push(curtxt);
-				return packetsTexts;
 				
+				return packetsTexts;
 				
 			}
 			
@@ -418,19 +423,57 @@
 				}
 
 			}
-			
-			//TODO
-			function textrightchange() {
-				var curstr="";
-				var arr= $("#textright").text().split('').map (function (c) { 
+
+
+			function stringToHex(str) {
+				var hexstr = str.split('').map (function (c) { 
 					var hex=c.charCodeAt(0).toString(16); 
 					if (hex.length == 1) {
 						hex="0" + hex;
 					}
 					return hex;
 				});
-				updateAbsoluteArr(normalHexRegexParse, arr);
-				
+				log("STR: " + hexstr);
+				return hexstr;
+			}
+
+			//TODO
+			function packetTextChange() {
+				log("THIS: " + this);
+				var curstr="";
+				var packetnewtext=($($("#textright").children()[0])).text();
+
+				var packethex=stringToHex(packetnewtext);
+
+				for (var i=0; i<packetsTexts.length; i++) {
+					if (i!=0)  {
+						curstr += stringToHex(packetsTexts[i]);
+					}
+					else {
+						curstr += packethex; 
+					}
+				}
+				log(curstr.split(''));
+				updateAbsoluteArr(normalHexRegexParse, curstr.split(''));
+				updateAllReps("right");
+
+				log($($("#textright").children()[0]).html());
+				//updateAbsoluteArr(normalHexRegexParse, arr);
+			}
+			
+			//TODO
+			function textrightchange() {				
+
+				var curstr="";
+				var arr= $("#textright").text().split('').map (function (c) { 
+					var hex=c.charCodeAt(0).toString(16); 
+					if (hex.length == 1) {
+						hex="0" + hex;
+					}
+
+					return hex;
+				});
+				updateAbsoluteArr(normalHexRegexParse, arr);				
 			}
 
 			function onload() {
@@ -438,14 +481,8 @@
 				$("#textcenter").bind('input propertychange', function() { textcenterchange(); });
 				$("#textright").bind('input propertychange', function() { textrightchange(); });
 				
-				absoluteRepSeparators=new Array();
-				absoluteRepSeparators.push(0);
-				absoluteRepSeparators.push(63);
-				absoluteDirectionsArr=new Array();
-				absoluteDirectionsArr.push(0);
-				absoluteDirectionsArr.push(1);
-				textrightchange();
-				updateAllReps("all");
+				textleftchange();
+				//updateAllReps("all");
 			}
 		
 		</script>
@@ -459,7 +496,10 @@
 			<div id="content">
 				<div id="columnLeft">
 					<div class="columnhead">CRA</div>
-					<textarea id="textleft">Paste CRA Hex Here (0x42, 0x4C, 0x41, 0x20, 0x42, 0x4C, 0x41 ...).</textarea>
+					<textarea id="textleft">char peer0_0[] = { 0x50, 0x61, 0x73, 0x74, 0x65, 0x20, 0x72, 0x65, 0x67, 0x75, 0x6c, 0x61, 0x72, 0x20, 0x48, 0x65, 0x78, 0x20, 0x63, 0x6f, 0x64, 0x65, 0x20, 0x69, 0x6e, 0x20, 0x74, 0x68, 0x65, 0x20, 0x6d, 0x69, 0x64, 0x64, 0x6c, 0x65, 0x20, 0x6f, 0x72, 0x20, 0x43, 0x52, 0x41, 0x20, 0x62, 0x79, 0x74, 0x65, 0x73, 0x20, 0x6f, 0x6e, 0x20, 0x74, 0x68, 0x65, 0x20, 0x6c, 0x65, 0x66, 0x74, 0x2e, 0x20 }; 
+
+char peer1_0[] = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x6e, 0x65, 0x78, 0x74, 0x20, 0x70, 0x61, 0x63, 0x6b, 0x65, 0x74, 0x2e, 0x2e, 0x2e }; 
+</textarea>
 				</div>
 				<div id="columnCenter">
 					<div class="columnhead">HEX Arrays</div>
@@ -467,7 +507,7 @@
 				</div>
 				<div id="columnRight">
 					<div class="columnhead">Ascii</div>
-					<div id="textright">Paste regular Hex code in the middle or CRA bytes on the left. This is the next packet...</div>
+					<div id="textright"></div>
 				</div>
 			</div>
 		</div>
