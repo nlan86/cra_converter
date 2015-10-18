@@ -2,7 +2,7 @@
 Wireshark C Array Format Converter. 
 
 
-![](./Screenshot.png = 250x)
+![](./Screenshot.png =650x)
 
 
 TODO: Enable editing packets in ASCII.
